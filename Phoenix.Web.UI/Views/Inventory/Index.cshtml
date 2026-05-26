@@ -1,0 +1,228 @@
+﻿@{
+    ViewData["Title"] = "Inventory";
+}
+
+@section pageTitle {
+    <span>Inventory</span>
+}
+
+<div class="grid-container">
+    <a href="javascript:;" class="blue-button create-button">Insert New Inventory</a>
+
+    <table class="inventory-data">
+        <thead>
+            <th>Action</th>
+            <th>Name</th>
+            <th>Stock</th>
+            <th>Description</th>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+            <tr>
+            <td colspan="4">
+                <div class="pagination">
+                <div>
+                    Page <span class="current-page"></span> of <span class="total-page"></span>
+                </div>
+                <div class="page-numbers"></div>
+                </div>
+            </td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+@section indexScript {
+    <script>
+
+        (function(){
+            getInventoryIndex();
+            createInsertListener();
+            closeButtonListener();
+            createSaveListener();
+        }());
+
+        function getInventoryIndex(page = 1){
+            let endpoint = `/Inventory/GetInventory?page=${page}`;
+            $.ajax({
+                url: endpoint,
+                success: function(response){
+                    if(!response.isException){
+                        populateTable(response);
+                    }
+                }
+            });
+        }
+
+        function populateTable({data}){
+            let rows = "";
+            for (let tableRow of data.table){
+                let row = 
+                `
+                    <tr>
+                        <td>
+                            <a href="javascript:;" class="blue-button update-button" data-id="${tableRow.name}">Update</a>
+                            <a href="javascript:;" class="blue-button delete-button" data-id="${tableRow.name}">Delete</a>
+                        </td>
+                        <td>${tableRow.name}</td>
+                        <td>${tableRow.stock}</td>
+                        <td>${tableRow.description}</td>
+                    </tr>;
+                `
+                rows += row;
+            }
+            $(".inventory-data tbody").html(rows);
+            $(".current-page").text(data.currentPage);
+            $(".total-page").text(data.totalPages);
+
+            let pageLinks = "";
+            for(let index = 1; index <= data.totalPage; index++){
+                let pageLink = `<a href="javascript:;" data-page="${index}">${index}</a> `;
+                pageLinks += pageLink;
+            }
+            $(".page-numbers").html(pageLinks);
+            createPageLinkListener();
+            createDeleteListener();
+            createEditListener();
+        }
+
+        function emptyUpsertForm(){
+            $(".upsert-popup .name").val("");
+            $(".upsert-popup .stock").val(0);
+            $(".upsert-popup textarea").val("");
+        }
+
+        function writeValidationMessage({validations}){
+            for(let validation of validations){
+                $(`.upsert-popup [data-for=${validation.propertyName}]`).text(validation.errorMessage);
+            }
+        }
+        
+        function collectInputForm(){
+            let dto = {
+                name: $(".upsert-popup .name").val(),
+                stock: $(".upsert-popup .stock").val(),
+                description: $(".upsert-popup .description").val()
+            };
+            return dto;
+        }
+
+        function closeDialog(){
+            $(".modal-layer").removeAttr("style");
+            $(".popup-dialog").removeAttr("style");
+            $(".validation-message").text("");
+            emptyUpsertForm();
+        }
+
+        function getInventory(name){
+            let endpoint = `/Inventory/GetSingleInventory?name=${name}`;
+            $.ajax({
+                url: endpoint,
+                success: function(response){
+                    if(!response.isException){
+                        fillUpdateForm(response.data);
+                    }
+                }
+            });
+        }
+
+        function fillUpdateForm(data){
+            $(".upsert-popup .name").val(data.name);
+            $(".upsert-popup .stock").val(data.stock);
+            $(".upsert-popup .description").val(data.description);
+        }
+
+        function getInventoryDepedencies(name){
+            let endpoint = `/Inventory/Delete?name=${name}`;
+            $.ajax({
+                url: endpoint,
+                method: "DELETE",
+                success: function(response){
+                    if(!response.isException && response.data == 0){
+                        getInventoryIndex();
+                    } else if(!response.isException && response.data > 0){
+                        $(".modal-layer").attr("style", "display:flex");
+                        $(".delete-popup").attr("style", "display:block");
+                    }
+                }
+            });
+        }
+
+        // Listener Function
+
+        function createPageLinkListener() {
+            $(".page-numbers > a").click(function(event){
+                let pageNumber = $(this).attr("data-page");
+                getInventoryIndex(pageNumber);
+            });
+        }
+
+        function createInsertListener(){
+            $(".create-button").click(function(event){
+                $(".modal-layer").attr("style", "display:flex");
+                $(".upsert-popup").attr("style", "display:block");
+                $(".upsert-popup button").attr("data-action", "Insert");
+                $(".action").text("Insert");
+            });
+        }
+
+        function createEditListener(){
+            $(".update-button").click(function(event){
+                let invName = $(this).attr("data-id");
+                $(".modal-layer").attr("style", "display:flex");
+                $(".upsert-popup").attr("style", "display:block");
+                $(".upsert-popup button").attr("data-action", "Update");
+                $(".action").text("Update");
+                getInventory(invName);
+            });
+        }
+
+        function closeButtonListener(){
+            $(".fa-window-close").click(function(event){
+                $(".modal-layer").removeAttr("style", "display:flex");
+                $(".popup-dialog").removeAttr("style", "display:block");
+                $(".validation-message").text("");
+                emptyUpsertForm();
+            });
+        }
+
+        function createSaveListener(){
+            $(".upsert-popup button").click(function(event){
+                $(".validation-message").text("");
+                let action = $(this).attr("data-action");
+                let dto = collectInputForm();
+                let endpoint = `/Inventory/${action}`;
+                $.ajax({
+                    url: endpoint,
+                    method: "POST",
+                    data: JSON.stringify(dto),
+                    contentType: "application/json",
+                    success: function(response){
+                        if(!response.isException && !response.isValidation){
+                            closeDialog();
+                            getInventoryIndex();
+                        } else if (!response.isException && response.isValidation){
+                            writeValidationMessage(response);
+                        }
+                    }
+                });
+            });
+        }
+
+        function createDeleteListener(){
+             $(".delete-button").click(function(event){
+                let deleteName = $(this).attr("data-id");
+                getInventoryDepedencies(deleteName);
+            });
+        }
+
+    </script>
+}
+
+@section popUpDialog {
+    <div class="modal-layer">
+        <partial name="_UpsertDialog" />
+        <partial name="_FailDeleteDialog" />
+    </div>
+}

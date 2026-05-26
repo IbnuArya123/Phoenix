@@ -1,0 +1,25 @@
+﻿@using Phoenix.DTO.Account;
+@model LoginDTO
+
+@{
+    Layout = "_AuthenticationLayout";
+}
+
+@{
+    ViewData["Title"] = "Login Form";
+}
+
+<h1>Sign In</h1>
+<form method="post" asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl">
+    <div asp-validation-summary="All"></div>
+    <input type="text" asp-for="Username" placeholder="Username..." autocomplete="off" />
+    <input type="password" asp-for="Password" placeholder="Password..." autocomplete="off"/>
+    <select name="role">
+            <option value="Administrator">Administrator</option>
+            <option value="Guest">Guest</option>
+        </select>
+    <button type="submit">Sign In</button>
+</form>
+<div class="link-container">
+    <a asp-action="Register">Register Guest here</a>
+</div>

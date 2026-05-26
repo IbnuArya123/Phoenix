@@ -1,0 +1,191 @@
+﻿@using Phoenix.DTO.RoomService
+@model IndexRosterDTO
+
+@{
+    ViewData["Title"] = "Roster";
+}
+
+@section pageTitle {
+    <span>Room Service / Roster</span>
+}
+
+<div class="grid-container">
+    <table>
+        <tbody>
+            <tr>
+                <td>Employee Number: </td>
+                <td>@Model.EmployeeNumber</td>
+            </tr>
+            <tr>
+                <td>Full Name: </td>
+                <td>@Model.FullName</td>
+            </tr>
+            <tr>
+                <td>Outsourcing Company: </td>
+                <td>@Model.Company</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="javascript:;" class="blue-button edit-button" >Edit Roster</a>
+    <a href="javascript:;" class="blue-button save-button" >Save Roster</a>
+
+    <table class="roster-data">
+        <tbody>
+            <tr class="monday">
+                <td>Monday</td>
+                <td>
+                    <span class="start-time-span">@(Model.MondayRosterStart == null ? "-" : Model.MondayRosterStart)</span>
+                    <input class="time-start" step="1" type="time" asp-for="MondayRosterStart"/>
+                </td>
+                <td>
+                    <span class="finish-time-span">@(Model.MondayRosterFinish == null ? "-" : Model.MondayRosterFinish)</span>
+                    <input class="time-finish" step="1" type="time" asp-for="MondayRosterFinish"/>
+                </td>
+            </tr>
+            <tr class="tuesday">
+                <td>Tuesday</td>
+                <td>
+                    <span class="start-time-span">@(Model.TuesdayRosterStart == null ? "-" : Model.TuesdayRosterStart)</span>
+                    <input class="time-start" step="1" type="time" asp-for="TuesdayRosterStart"/>
+                </td>
+                <td>
+                    <span class="finish-time-span">@(Model.TuesdayRosterFinish == null ? "-" : Model.TuesdayRosterFinish)</span>
+                    <input class="time-finish" step="1" type="time" asp-for="TuesdayRosterFinish"/>
+                </td>
+            </tr>
+            <tr class="wednesday">
+                <td>Wednesday</td>
+                <td>
+                    <span class="start-time-span">@(Model.WednesdayRosterStart == null ? "-" : Model.WednesdayRosterStart)</span>
+                    <input class="time-start" step="1" type="time" asp-for="WednesdayRosterStart"/>
+                </td>
+                <td>
+                    <span class="finish-time-span">@(Model.WednesdayRosterFinish == null ? "-" : Model.WednesdayRosterFinish)</span>
+                    <input class="time-finish" step="1" type="time" asp-for="WednesdayRosterFinish"/>
+                </td>
+            </tr>
+            <tr class="thursday">
+                <td>Thursday</td>
+                <td>
+                    <span class="start-time-span">@(Model.ThursdayRosterStart == null ? "-" : Model.ThursdayRosterStart)</span>
+                    <input class="time-start" step="1" type="time" asp-for="ThursdayRosterStart"/>
+                </td>
+                <td>
+                    <span class="finish-time-span">@(Model.ThursdayRosterFinish == null ? "-" : Model.ThursdayRosterFinish)</span>
+                    <input class="time-finish" step="1" type="time" asp-for="ThursdayRosterFinish"/>
+                </td>
+            </tr>
+            <tr class="friday">
+                <td>Friday</td>
+                <td>
+                    <span class="start-time-span">@(Model.FridayRosterStart == null ? "-" : Model.FridayRosterStart)</span>
+                    <input class="time-start" step="1" type="time" asp-for="FridayRosterStart"/>
+                </td>
+                <td>
+                    <span class="finish-time-span">@(Model.FridayRosterEnd == null ? "-" : Model.FridayRosterEnd)</span>
+                    <input class="time-finish" step="1" type="time" asp-for="FridayRosterEnd"/>
+                </td>
+            </tr>
+            <tr class="saturday">
+                <td>Saturday</td>
+               <td>
+                    <span class="start-time-span">@(Model.SaturdayRosterStart == null ? "-" : Model.SaturdayRosterStart)</span>
+                    <input class="time-start" step="1" type="time" asp-for="SaturdayRosterStart"/>
+                </td>
+                <td>
+                    <span class="finish-time-span">@(Model.SaturdayRosterFinish == null ? "-" : Model.SaturdayRosterFinish)</span>
+                    <input class="time-finish" step="1" type="time" asp-for="SaturdayRosterFinish"/>
+                </td>
+            </tr>
+            <tr class="sunday">
+                <td>Sunday</td>
+                <td>
+                    <span class="start-time-span">@(Model.SundayRosterStart == null ? "-" : Model.SundayRosterStart)</span>
+                    <input class="time-start" step="1" type="time" asp-for="SundayRosterStart"/>
+                </td>
+                <td>
+                    <span class="finish-time-span">@(Model.SundayRosterFinish == null ? "-" : Model.SundayRosterFinish)</span>
+                    <input class="time-finish" step="1" type="time" asp-for="SundayRosterFinish"/>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@section indexScript{
+
+    <script>
+        (function(){
+            index();
+            createEditListener();
+            createSaveListener();
+        }())
+
+        function index(){
+            $(".roster-data .time-start").attr("style", "display:none");
+            $(".roster-data .time-finish").attr("style", "display:none");
+            $(".roster-data .start-time-span").attr("style", "display:inline");
+            $(".roster-data .finish-time-span").attr("style", "display:inline");
+            $(".edit-button").attr("style", "display:inline-block");
+            $(".save-button").attr("style", "display:none");
+        }
+
+        function collectTimeInput(){
+            let dto = {
+                employeeNumber: "@Model.EmployeeNumber",
+                mondayRosterStart: ($(".monday .time-start").val() == "") ? null : $(".monday .time-start").val(),
+                mondayRosterFinish: ($(".monday .time-finish").val() == "") ? null : $(".monday .time-finish").val(),
+                tuesdayRosterStart: ($(".tuesday .time-start").val() == "") ? null : $(".tuesday .time-start").val(),
+                tuesdayRosterFinish: ($(".tuesday .time-finish").val() == "") ? null : $(".tuesday .time-finish").val(),
+                wednesdayRosterStart: ($(".wednesday .time-start").val() == "") ? null : $(".wednesday .time-start").val(),
+                wednesdayRosterFinish: ($(".wednesday .time-finish").val() == "") ? null : $(".wednesday .time-finish").val(),
+                thursdayRosterStart: ($(".thursday .time-start").val() == "") ? null : $(".thursday .time-start").val(),
+                thursdayRosterFinish: ($(".thursday .time-finish").val() == "") ? null : $(".thursday .time-finish").val(),
+                fridayRosterStart: ($(".friday .time-start").val() == "") ? null : $(".friday .time-start").val(),
+                fridayRosterEnd: ($(".friday .time-finish").val() == "") ? null : $(".friday .time-finish").val(),
+                saturdayRosterStart: ($(".saturday .time-start").val() == "") ? null : $(".saturday .time-start").val(),
+                saturdayRosterFinish: ($(".saturday .time-finish").val() == "") ? null : $(".saturday .time-finish").val(),
+                sundayRosterStart: ($(".sunday .time-start").val() == "") ? null : $(".sunday .time-start").val(),
+                sundayRosterFinish: ($(".sunday .time-finish").val() == "") ? null : $(".sunday .time-finish").val()
+            }
+            return dto;
+        }
+
+        // function Listener
+
+        function createEditListener(){
+            $(".edit-button").click(function(event){
+                $(".roster-data .time-start").attr("style", "display:inline");
+                $(".roster-data .time-finish").attr("style", "display:inline");
+                $(".roster-data .start-time-span").attr("style", "display:none");
+                $(".roster-data .finish-time-span").attr("style", "display:none");
+                $(".edit-button").attr("style", "display:none");
+                $(".save-button").attr("style", "display:inline-block");
+            });
+        }
+
+        function createSaveListener(){
+            $(".save-button").click(function(event){
+                let endpoint = "/RoomService/SaveRoster"
+                let dto = collectTimeInput();
+                $.ajax({
+                    url: endpoint,
+                    method: "POST",
+                    data: JSON.stringify(dto),
+                    contentType: "application/json",
+                    success: function(response){
+                        if(!response.isException){
+                            location.reload();
+                            index();
+                        } else {
+                            console.log("Exception");
+                        }
+                    }
+                });
+            });
+        }
+
+    </script>
+
+}

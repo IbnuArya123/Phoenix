@@ -1,0 +1,74 @@
+﻿@using Phoenix.DTO.Reservation
+@model ReservationDetailDTO
+
+@{
+    ViewData["Title"] = "Reservation Detail";
+}
+
+@section pageTitle {
+    <span>Reservation Log / Reservation Detail</span>
+}
+
+<div class="grid-container">
+    <table>
+        <tbody>
+            <tr>
+                <td><label>Reservation Code :</label></td>
+                <td>@Model.ReservationCode</td>
+            </tr>
+            <tr>
+                <td><label>Reservation Method :</label></td>
+                <td>@Model.ReservationMethod</td>
+            </tr>
+            <tr>
+                <td><label>Room Number :</label></td>
+                <td>@Model.RoomNumber</td>
+            </tr>
+            <tr>
+                <td><label>Room Floor :</label></td>
+                <td>@Model.RoomFloor</td>
+            </tr>
+            <tr>
+                <td><label>Room Type :</label></td>
+                <td>@Model.RoomType</td>
+            </tr>
+            <tr>
+                <td><label>Guest Username :</label></td>
+                <td>@Model.GuestUsername</td>
+            </tr>
+            <tr>
+                <td><label>Guest Fullname :</label></td>
+                <td>@Model.GuestFullName</td>
+            </tr>
+            <tr>
+                <td><label>Book Date :</label></td>
+                <td>@Model.BookDate</td>
+            </tr>
+            <tr>
+                <td><label>Check In :</label></td>
+                <td>@Model.CheckIn</td>
+            </tr>
+            <tr>
+                <td><label>Check Out :</label></td>
+                <td>@Model.CheckOut</td>
+            </tr>
+            <tr>
+                <td><label>Cost :</label></td>
+                <td>@Model.Cost</td>
+            </tr>
+            <tr>
+                <td><label>Payment Date :</label></td>
+                <td>@Model.PaymentDate</td>
+            </tr>
+            <tr>
+                <td><label>Payment Method :</label></td>
+                <td>@Model.PaymentMethod</td>
+            </tr>
+            <tr>
+                <td><label>Remark :</label></td>
+                <td>@Model.Remark</td>
+            </tr>
+        </tbody>
+    </table>
+    <a asp-action="Index" class="blue-button" >Back</a>
+</div>

@@ -1,0 +1,30 @@
+﻿<div class="popup-dialog upsert-popup">
+    <header>
+        <a href="javascript:;" class="close-button">
+            <i class="fas fa-window-close"></i>
+        </a>
+    </header>
+    <input type="hidden" class="id" value="0"/>
+    <input type="hidden" class="room-number" value="@Model.RoomNumber"/>
+    <table>
+        <tbody>
+            <tr>
+                <td>Inventory Name*: </td>
+                <td>
+                    <select class="inventory-dropdown">
+                        <option value="">-</option>
+                    </select>
+                    <div class="validation-message" data-for="InventoryName"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Quantity*: </td>
+                <td>
+                    <input type="number" class="quantity" value="0" />
+                    <div class="validation-message" data-for="Quantity"></div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button class="blue-button" type="submit">Insert New Item</button>
+</div>

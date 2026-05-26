@@ -1,0 +1,193 @@
+﻿@using Phoenix.DTO.Room
+@model IndexRoomInventoryDTO
+
+@{
+    ViewData["Title"] = "Room Invemtory";
+}
+
+@section pageTitle {
+    <span>Room / Room Invemtory</span>
+}
+
+<div class="grid-container">
+    <div class="upsert-form">
+        <table class="room-info">
+            <tbody>
+                <tr>
+                    <td>Room Number</td>
+                    <td>@Model.RoomNumber</td>
+                </tr>
+                <tr>
+                    <td>Floor Number</td>
+                    <td>@Model.RoomFloor</td>
+                </tr>
+                <tr>
+                    <td>Room Type</td>
+                    <td>@Model.RoomType</td>
+                </tr>
+                <tr>
+                    <td>Guest Limit</td>
+                    <td>@Model.GuestLimit</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <a href="javascript:;" class="blue-button create-button" room-number="@Model.RoomNumber">Insert New Item</a>
+    <table class="details-data">
+        <thead>
+            <th>Action</th>
+            <th>Inventory</th>
+            <th>Stock</th>
+            <th>Quantity</th>
+        </thead>
+        <tbody>
+            @foreach(var data in Model.Table){
+                <tr>
+                    <td>
+                        <a href="javascript:;" class="blue-button remove-button" data-id="@data.Id">Remove</a>
+                    </td>
+                    <td>@data.Name</td>
+                    <td>@data.Stock</td>
+                    <td>@data.Quantity</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4">
+                    <div class="pagination">
+                    <div>
+                        Page @ViewBag.CurrentPage of @Model.TotalPages
+                    </div>
+                        @for(int index = 1; index <= Model.TotalPages; index++){
+                            <a asp-route-roomNumber="@Model.RoomNumber" asp-route-page="@index">@index</a>
+                        }
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+@section indexScript {
+    <script>
+
+        (function(){
+            createInsertListener();
+            getInventoryDropdown();
+            closePopupListener();
+            createRemoveListener();
+            createSaveListener();
+        }());
+
+        function emptyUpsertForm() {
+            $(".upsert-popup .id").val(0);
+            $(".upsert-popup .quantity").val(0);
+        }
+
+        function collectInputForm(){
+            return {
+                id: $(".upsert-popup .id").val(),
+                roomNumber: $(".upsert-popup .room-number").val(),
+                inventoryName: $(".upsert-popup .inventory-dropdown").val(),
+                quantity: ($(".upsert-popup .quantity").val() == "") ? null : $(".upsert-popup .quantity").val()
+            }
+        }
+
+        function writeValidationMessage(validations){
+            for(let validation of validations){
+                $(`.upsert-popup [data-for=${validation.propertyName}]`).text(validation.errorMessage);
+            }
+        }
+
+        function closeDialog(){
+            $(".modal-layer").removeAttr("style");
+            $(".popup-dialog").removeAttr("style");
+            $(".validation-message").text("");
+            emptyUpsertForm();
+        }
+
+        // Function Listener
+
+        function getInventoryDropdown(){
+            let endpoint = "/Room/GetInventoryDropdown";
+            $.ajax({
+                url: endpoint,
+                method: "GET",
+                success: function(response){
+                    for(let data of response.data){
+                        $(".inventory-dropdown").append($(`<option>`,{
+                            value: data.value,
+                            text: data.displayName
+                        }));
+                    }
+                }
+            });
+        }
+
+        function createInsertListener() {
+            $(".create-button").click(function(event){
+                $(".modal-layer").attr("style", "display:flex");
+                $(".upsert-popup").attr("style", "display:block");
+                let roomNumber = $(this).attr("room-number");
+                $(".room-number").val(roomNumber);
+            });
+        }
+
+        function createSaveListener() {
+            $(".upsert-popup button").click(function(event){
+                $(".validation-message").text("");
+                let dto = collectInputForm();
+                let endpoint = "/Room/InsertRoomDetails";
+                $.ajax({
+                    url: endpoint,
+                    method: "POST",
+                    data: JSON.stringify(dto),
+                    contentType: "application/json",
+                    success: function(response){
+                        if(!response.isException && !response.isValidation){
+                            location.reload();
+                            closeDialog();
+                        } else if (!response.isException && response.isValidation){
+                            console.log(response.validations);
+                            writeValidationMessage(response.validations);
+                        }
+                    }
+                })
+            });
+        }
+
+        function closePopupListener() {
+            $(".fa-window-close").click(function(event){
+                $(".modal-layer").removeAttr("style", "display:flex");
+                $(".popup-dialog").removeAttr("style", "display:block");
+                $(".validation-message").text("");
+                emptyUpsertForm();
+            });
+        }
+
+        function createRemoveListener() {
+            $(".remove-button").click(function(event){
+                let deleteId = $(this).attr("data-id");
+                let endpoint = `/Room/RemoveRoomDetail/${deleteId}`;
+                $.ajax({
+                    url: endpoint,
+                    method: "DELETE",
+                    success: function(response){
+                        if(!response.isException){
+                            location.reload();
+                        }
+                    }
+                });
+            });
+        }
+
+    </script>
+}
+
+@section popUpDialog {
+    <div class="modal-layer">
+        <partial name="_UpsertDetailDialog" />
+    </div>
+}

@@ -1,0 +1,162 @@
+﻿@using System.Security.Claims;
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Phoenix</title>
+    <link rel="stylesheet" href="~/css/normalize.css" />
+    <link rel="stylesheet" href="~/css/font-awesome.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <script src="~/js/jquery-3.6.0.js"></script>
+</head>
+<body class="main-body">
+    @{
+        var claims = User.Claims;
+        string username = "anonymous";
+        string role = "guest";
+        foreach(var claim in claims){
+            if (claim.Type == ClaimTypes.NameIdentifier){
+                username = claim.Value;
+            } else if (claim.Type == ClaimTypes.Role){
+                role = claim.Value;
+            }
+        }
+    }
+    <partial name="_Menu" />
+    <header>
+        <div class="bread-crumbs">
+            @RenderSection("pageTitle") @*defaultnya true jika ingin beberapa page tidak ingin ada title bsa tambahkan parameter false*@
+        </div>
+        <div class="user-wrapper">
+            <div class="user">
+                <span class="full-name">@username</span>
+                <span class="account-role">@role</span>
+            </div>
+            <div>
+                <a href="javascript:;" class="blue-button change-password">Change Password</a>
+            </div>
+            <div class="sign-out">
+                <a asp-action="Logout" asp-controller="Account">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+    <main>
+        <div class="modal-layer password-layer">
+            <div class="popup-dialog change-password-popup">
+                <header>
+                    <a href="javascript:;" class="close-button">
+                        <i class="fas fa-window-close"></i>
+                    </a>
+                </header>
+                <input type="hidden" class="username" value="@username"/>
+                <input type="hidden" class="role" value="@role"/>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>Old Password*: </td>
+                            <td>
+                                <input type="password" class="old-password"/>
+                                <div class="validation-message" data-for="OldPassword"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>New Password*: </td>
+                            <td>
+                                <input type="password" class="new-password"/>
+                                <div class="validation-message" data-for="NewPassword"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>New Password Confirmation*: </td>
+                            <td>
+                                <input type="password" class="new-password-confirm"/>
+                                <div class="validation-message" data-for="NewPasswordConfirmation"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button class="blue-button change-button" type="submit">Change New Password</button>
+            </div>
+        </div>
+            @RenderBody()
+    </main>
+    @RenderSection("popUpDialog", required: false)
+    @RenderSection("indexScript", required: false)
+</body>
+<script>
+    (function(){
+        createChangePasswordListener()
+        createSaveNewPasswordListener()
+        createClosePasswordPopupListener()
+    }());
+
+    function closePasswordDialog(){
+        $(".password-layer").removeAttr("style");
+        $(".change-password-popup").removeAttr("style");
+        $(".validation-message").text("");
+        emptyChangePasswordForm();
+    }
+
+    function emptyChangePasswordForm(){
+        $(".change-password-popup input").val("");
+    }
+
+    function writePasswordValidationMessage({validations}){
+        for(let validation of validations){
+            $(`.change-password-popup [data-for=${validation.propertyName}]`).text(validation.errorMessage);
+        }
+    }
+
+    function collectInputPasswordForm(){
+        let dto = {
+            username: $(".username").val(),
+            oldPassword: $(".old-password").val(),
+            newPassword: $(".new-password").val(),
+            newPasswordConfirmation: $(".new-password-confirm").val(),
+            role: $(".role").val()
+        }
+        return dto;
+    }
+
+    function createChangePasswordListener(){
+        $(".change-password").click(function(event){
+            $(".password-layer").attr("style", "display:flex");
+            $(".change-password-popup").attr("style", "display:block");
+        });
+    }
+
+    function createSaveNewPasswordListener(){
+        $(".change-password-popup .change-button").click(function(event){
+            let endpoint = "/Account/ChangePassword"
+            let dto = collectInputPasswordForm();
+            $.ajax({
+                url: endpoint,
+                method: "POST",
+                data: JSON.stringify(dto),
+                contentType: "application/json",
+                success: function(response){
+                    if(!response.isException && !response.isValidation){
+                        closePasswordDialog();
+                    } else if(!response.isException && response.isValidation) {
+                        writePasswordValidationMessage(response)
+                    }
+                }
+            });
+        });
+    }
+
+    function createClosePasswordPopupListener() {
+        $(".fa-window-close").click(function(event){
+            $(".password-layer").removeAttr("style", "display:flex");
+            $(".change-password-popup").removeAttr("style", "display:block");
+            $(".validation-message").text("");
+            emptyChangePasswordForm();
+        });
+    }
+
+</script>
+</html>

@@ -1,0 +1,47 @@
+﻿<div class="popup-dialog upsert-popup">
+    <header>
+        <a href="javascript:;" class="close-button">
+            <i class="fas fa-window-close"></i>
+        </a>
+    </header>
+    @*<input type="hidden" class="id" value="0"/>*@
+    <table>
+        <tbody>
+            <tr>
+                <td>Employee Number*: </td>
+                <td>
+                    <input class="employee-number" />
+                    <span class="employee-span"></span>
+                    <div class="validation-message" data-for="EmployeeNumber"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>First Name*: </td>
+                <td>
+                    <input class="first-name" />
+                    <div class="validation-message" data-for="FirstName"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Middle Name*: </td>
+                <td>
+                    <input class="middle-name" />
+                </td>
+            </tr>
+            <tr>
+                <td>Last Name*: </td>
+                <td>
+                    <input class="last-name" />
+                </td>
+            </tr>
+            <tr>
+                <td>Outsourcing Company*: </td>
+                <td>
+                    <input class="company" />
+                    <div class="validation-message" data-for="Company"></div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button class="blue-button" type="submit" data-action="Insert"><span class="action"></span> Employee</button>
+</div>

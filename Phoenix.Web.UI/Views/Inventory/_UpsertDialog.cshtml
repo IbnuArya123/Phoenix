@@ -1,0 +1,33 @@
+﻿<div class="popup-dialog upsert-popup">
+    <header>
+        <h1>Customer Form</h1>
+        <a href="javascript:;" class="close-button">
+            <i class="fas fa-window-close"></i>
+        </a>
+    </header>
+    <table>
+        <tbody>
+            <tr>
+                <td>Name*: </td>
+                <td>
+                    <input type="text" class="name" />
+                    <div class="validation-message" data-for="Name"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Stock*: </td>
+                <td>
+                    <input type="number" class="stock" value="0" />
+                    <div class="validation-message" data-for="Stock"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>Description: </td>
+                <td>
+                    <textarea class="description"></textarea>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button class="blue-button" type="submit" data-action="Insert"><span class="action"></span> Inventories</button>
+</div>

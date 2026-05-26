@@ -1,0 +1,79 @@
+﻿@using Phoenix.DTO.Room
+@using System.Security.Claims
+@model RoomDetailDTO
+
+@{
+    ViewData["Title"] = "Room Detail";
+}
+
+@section pageTitle {
+    <span>Booking / Room Detail</span>
+}
+@{
+    var claims = User.Claims;
+    string username = "";
+    foreach(var claim in claims){
+        if (claim.Type == ClaimTypes.NameIdentifier){
+            username = claim.Value;
+        }
+    }
+}
+
+<div class="grid-container">
+    <form method="get" asp-action="Reservation">
+        <input type="hidden" name="username" value="@username" />
+        <span class="status" hidden data-status="@Model.Status"></span>
+        <table>
+            <tbody>
+                <tr>
+                    <td><label>Room Number :</label></td>
+                    <td>@Model.RoomNumber</td>
+                    <td><input type="hidden" name="roomNumber" value="@Model.RoomNumber" /></td>
+                </tr>
+                <tr>
+                    <td><label>Floor :</label></td>
+                    <td>@Model.Floor</td>
+                </tr>
+                <tr>
+                    <td><label>Type :</label></td>
+                    <td>@Model.RoomType</td>
+                </tr>
+                <tr>
+                    <td><label>Guest Limit :</label></td>
+                    <td>@Model.GuestLimit</td>
+                </tr>
+                <tr>
+                    <td><label>Cost :</label></td>
+                    <td>@Model.Cost</td>
+                </tr>
+                <tr>
+                    <td><label>Description :</label></td>
+                    <td>@Model.Description</td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="submit" class="blue-button reserve-button">Make Reservation</button>
+        <a asp-action="Index" class="blue-button" >Cancel</a>
+    </form>
+</div>
+
+@section indexScript{
+
+    <script>
+
+        (function(){
+            isBooked();
+        }())
+
+        function isBooked(){
+            let roomStatus = $(".status").attr("data-status");
+            if(roomStatus == "Booked"){
+                $(".reserve-button").attr("style", "display:none");
+            }else {
+                $(".reserve-button").removeAttr("style", "display:none");
+            }
+        }
+
+    </script>
+
+}

@@ -1,0 +1,138 @@
+﻿@using Phoenix.DTO.Reservation
+@using System.Security.Claims
+@model IndexGuestRoomDetailDTO
+
+@{
+    ViewData["Title"] = "My Room";
+}
+
+@section pageTitle {
+    <span>My Room</span>
+}
+
+@{
+    var claims = User.Claims;
+    string username = "";
+    foreach(var claim in claims){
+        if (claim.Type == ClaimTypes.NameIdentifier){
+            username = claim.Value;
+        }
+    }
+}
+
+<div class="grid-container">
+    
+    </select>
+    @foreach(var row in Model.Table){
+        <a class="blue-button @row.BookingStatus" asp-action="Reservation" asp-controller="Booking" asp-route-username="@username" asp-route-roomNumber="@row.RoomNumber">Extend Stay</a>
+        <table class="@row.BookingStatus">
+            <tr>
+                <td>
+                    <label>Room Number</label>
+                </td>
+                <td>
+                    @row.RoomNumber
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Floor</label>
+                </td>
+                <td>
+                    @row.Floor
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Type</label>
+                </td>
+                <td>
+                    @row.RoomType
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Guest Limit</label>
+                </td>
+                <td>
+                    @row.GuestLimit
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Cost Per Night</label>
+                </td>
+                <td>
+                    @row.Cost
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Check In</label>
+                </td>
+                <td>
+                    @row.CheckIn
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Check Out</label>
+                </td>
+                <td>
+                    @row.CheckOut
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Total Cost</label>
+                </td>
+                <td>
+                    @row.TotalCost
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Payment Date</label>
+                </td>
+                <td>
+                    @row.PaymentDate
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Payment Method</label>
+                </td>
+                <td>
+                    @row.PaymentMethod
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Remark</label>
+                </td>
+                <td>
+                    @row.Remark
+                </td>
+            </tr>
+        </table>
+    }
+</div>
+
+@section indexScript{
+
+    <script>
+
+        (function(){
+            $(".Expired").attr("style", "display:none");
+            
+        }())
+
+        function testing(){
+            let month = $(".test").val()
+            let year = $(".test2").val()
+            console.log(`Month ${month}, Year ${year}`);
+        }
+
+    </script>
+
+}

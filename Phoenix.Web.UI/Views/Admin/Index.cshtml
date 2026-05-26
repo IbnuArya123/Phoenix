@@ -1,0 +1,202 @@
+﻿@{
+    ViewData["Title"] = "Admin Index";
+}
+
+@section pageTitle {
+    <span>Admin</span>
+}
+
+<div class="grid-container">
+
+    <a href="javascript:;" class="blue-button create-button">Insert New Admin</a>
+    <table class="admin-data">
+        <thead>
+            <th>Action</th>
+            <th>Username</th>
+            <th>Job Title</th>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+            <tr>
+            <td colspan="4">
+                <div class="pagination">
+                <div>
+                    Page <span class="current-page"></span> of <span class="total-page"></span>
+                </div>
+                <div class="page-numbers"></div>
+                </div>
+            </td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+@section indexScript {
+    
+    <script>
+
+        (function(){
+            getAdminIndex();
+            createCloseListener();
+            createInsertListener();
+            createSaveListener();
+        }())
+
+        function getAdminIndex(page = 1){
+            let endpoint = `/Admin/GetAdmin?page=${page}`;
+            $.ajax({
+                url: endpoint,
+                success: function(response){
+                    if(!response.isException){
+                        populateData(response);
+                    }
+                }
+            });
+        }
+
+        function populateData({data}){
+            let rows = "";
+            for (let tableRow of data.table){
+                let row = 
+                `
+                    <tr>
+                        <td>
+                            <a href="javascript:;" class="blue-button update-button" data-id="${tableRow.username}">Edit</a>
+                        </td>
+                        <td>${tableRow.username}
+                        <td>${tableRow.jobTitle}</td>
+                    </tr>;
+                `
+                rows += row;
+            }
+            $(".admin-data tbody").html(rows);
+            $(".current-page").text(data.currentPage);
+            $(".total-page").text(data.totalPages);
+
+            let pageLinks = "";
+            for(let index = 1; index <= data.totalPage; index++){
+                let pageLink = `<a href="javascript:;" data-page="${index}">${index}</a> `;
+                pageLinks += pageLink;
+            }
+            $(".page-numbers").html(pageLinks);
+            
+            createPageLinkListener();
+            createUpdateListener();
+        }
+
+        function getSingleAdmin(username){
+            let endpoint = `/Admin/GetSingleAdmin?username=${username}`;
+            $.ajax({
+                url: endpoint,
+                success: function(response){
+                    if(!response.isException){
+                        fillUpsertForm(response)
+                    }
+                }
+            });
+        }
+
+        function fillUpsertForm({data}){
+            $(".upsert-popup .username").val(data.username),
+            $(".upsert-popup .job-title").val(data.jobTitle)
+        }
+
+        function emptyUpsertForm(){
+            $(".upsert-popup input").val("");
+        }
+
+        function closeDialog(){
+            $(".modal-layer").removeAttr("style");
+            $(".popup-dialog").removeAttr("style");
+            $(".validation-message").text("");
+            emptyUpsertForm();
+        }
+
+        function writeValidationMessage({validations}){
+            for(let validation of validations){
+                $(`.upsert-popup [data-for=${validation.propertyName}]`).text(validation.errorMessage);
+            }
+        }
+
+        function collectInputForm(){
+            let dto = {
+                username: $(".upsert-popup .username").val(),
+                jobTitle: $(".upsert-popup .job-title").val()
+            }
+            return dto;
+        }
+
+        // function Listener
+
+        function createPageLinkListener() {
+            $(".page-numbers > a").click(function(event){
+                let pageNumber = $(this).attr("data-page");
+                let empNumber = $("[number=empNumber]").val();
+                let fullName = $("[name=fullName]").val();
+                getAdminIndex(pageNumber);
+            });
+        }
+
+        function createInsertListener(){
+            $(".create-button").click(function(event){
+                $(".modal-layer").attr("style", "display:flex");
+                $(".upsert-popup").attr("style", "display:block");
+                $(".upsert-popup button").attr("data-action", "Insert");
+                $(".upsert-popup .action").text("Insert");
+            });
+        }
+
+        function createUpdateListener(){
+            $(".update-button").click(function(event){
+                let username = $(this).attr("data-id");
+                $(".modal-layer").attr("style", "display:flex");
+                $(".upsert-popup").attr("style", "display:block");
+                $(".upsert-popup button").attr("data-action", "Update");
+                $(".upsert-popup .action").text("Update");
+                getSingleAdmin(username);
+            });
+        }
+
+        function createSaveListener(){
+            $(".upsert-popup .submit-button").click(function(event){
+                $(".validation-message").text("");
+                let action = $(this).attr("data-action");
+                let dto = collectInputForm();
+                let endpoint = `/Admin/${action}`;
+                $.ajax({
+                    url: endpoint,
+                    method: "POST",
+                    data: JSON.stringify(dto),
+                    contentType: "application/json",
+                    success: function(response){
+                        if(!response.isException && !response.isValidation){
+                            closeDialog();
+                            getAdminIndex();
+                        } else if (!response.isException && response.isValidation){
+                            writeValidationMessage(response);
+                            console.log("Masuk ke sini ada exception");
+                        }
+                    }
+                });
+            });
+        }
+
+        function createCloseListener(){
+            $(".fa-window-close").click(function(event){
+                $(".modal-layer").removeAttr("style", "display:flex");
+                $(".popup-dialog").removeAttr("style", "display:block");
+                $(".validation-message").text("");
+                emptyUpsertForm();
+            });
+        }
+
+    </script>
+
+}
+
+@section popupDialog{
+    <div class="modal-layer">
+        <partial name="_UpsertDialog" />
+    </div>
+}

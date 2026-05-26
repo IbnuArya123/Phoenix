@@ -1,0 +1,72 @@
+﻿@using Phoenix.DTO.Room
+@model IndexRoomDTO
+
+@{
+    ViewData["Title"] = "Room Index";
+}
+
+@section pageTitle {
+    <span>Room</span>
+}
+
+<div class="grid-container">
+    <form class="filter" method="get">
+        <input type="text" name="roomNumber" placeholder="Room Number..." value="@ViewBag.RoomNumber"/>
+        <select name="roomType">
+            <option value="">-</option>
+            @foreach(var type in Model.RoomType){
+                <option value="@type.Value">@type.Value</option>
+            }
+        </select>
+        <select name="status">
+            <option value="">-</option>
+            <option value="Booked">Booked</option>
+            <option value="Vacant">Vacant</option>
+        </select>
+        <button class="blue-button" type="submit">Filter</button>
+    </form>
+
+    <a asp-action="Insert" class="blue-button create-button">Add New Room</a>
+
+    <table class="room-data">
+        <thead>
+            <th>Action</th>
+            <th>Number</th>
+            <th>Floor</th>
+            <th>Type</th>
+            <th>GuestLimit</th>
+            <th>Cost per Day</th>
+            <th>Status</th>
+        </thead>
+        <tbody>
+            @foreach(var row in Model.Table){
+                <tr>
+                    <td>
+                        <a class="blue-button update-button" asp-route-roomNumber="@row.RoomNumber" asp-action="Update">Edit</a>
+                        <a class="blue-button detail-button" asp-route-roomNumber="@row.RoomNumber" asp-action="Details">Item</a>
+                    </td>
+                    <td>@row.RoomNumber</td>
+                    <td>@row.Floor</td>
+                    <td>@row.Type</td>
+                    <td>@row.GuestLimit</td>
+                    <td>@row.Cost</td>
+                    <td>@row.Status</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="7">
+                    <div class="pagination">
+                    <div>
+                        Page @ViewBag.CurrentPage of @Model.TotalPages
+                    </div>
+                        @for(int index = 1; index <= Model.TotalPages; index++){
+                            <a asp-route-roomNumber="@ViewBag.RoomNumber" asp-route-page="@index">@index</a>
+                        }
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+</div>

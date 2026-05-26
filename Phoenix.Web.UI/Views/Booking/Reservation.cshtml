@@ -1,0 +1,157 @@
+﻿@using Phoenix.DTO.Reservation
+@using System.Security.Claims
+@model InsertReservationDTO
+
+@section pageTitle {
+    <span>Booking / Reservation Form</span>
+}
+
+@{
+    var claims = User.Claims;
+    string username = "";
+    foreach(var claim in claims){
+        if (claim.Type == ClaimTypes.NameIdentifier){
+            username = claim.Value;
+        }
+    }
+}
+
+<form method="post" asp-action="Reservation" asp-controller="Booking" class="upsert-form">
+    <table>
+        <input type="hidden" value="@username" asp-for="@Model.Username" />
+        <tbody>
+            <tr>
+                <td>
+                    <label>Room Number:</label>
+                </td>
+                <td>
+                    <input type="hidden" asp-for="@Model.RoomNumber"/>
+                    <span>@Model.RoomNumber</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Floor:</label>
+                </td>
+                <td>
+                    <input type="hidden" asp-for="@Model.Floor"/>
+                    <span>@Model.Floor</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Room Type:</label>
+                </td>
+                <td>
+                    <input type="hidden" asp-for="@Model.RoomType"/>
+                    <span>@Model.RoomType</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Guest Limit:</label>
+                </td>
+                <td>
+                    <input type="hidden" asp-for="@Model.GuestLimit"/>
+                    <span>@Model.GuestLimit</span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Cost:</label>
+                </td>
+                <td>
+                    <input type="hidden" asp-for="@Model.Cost"/>
+                    <span class="cost-per-night"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>Check In:</td>
+                <td>
+                    <input type="date" asp-for="@Model.CheckIn" class="tanggal-in" />
+                    <span asp-validation-for="@Model.CheckIn"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>Check Out:</td>
+                <td>
+                    <input type="date" asp-for="@Model.CheckOut" class="tanggal-out" />
+                    <span asp-validation-for="@Model.CheckOut"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Total Cost:</label>
+                </td>
+                <td>
+                    <input type="hidden" class="total" asp-for="@Model.TotalCost"/>
+                    <span class="total-cost"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Payment Method:</label>
+                </td>
+                <td>
+                    <select asp-for="PaymentMethod" asp-items="@(new SelectList(Model.PaymentMethodDropdown, "Value", "DisplayName"))"></select>
+                    <span asp-validation-for="PaymentMethod"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Remark:</label>
+                </td>
+                <td>
+                    <textarea asp-for="@Model.Remark"></textarea>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button type="submit" class="blue-button">Submit Reservation</button>
+</form>
+
+@section indexScript{
+
+    <script>
+
+        (function(){
+            const formatter = new Intl.NumberFormat(`id-ID`, {
+                style: 'currency',
+                currency: 'IDR',
+            })
+
+            $(".cost-per-night").html(formatter.format(@Model.Cost))
+            $(".tanggal-in").change(function(event){
+                getTotalCost();
+            });
+            $(".tanggal-out").change(function(event){
+                getTotalCost();
+            });
+        }())
+
+        function getTotalCost(){
+            let checkIn = $(".tanggal-in").val()
+            let checkOut = $(".tanggal-out").val()
+
+            date1 = new Date(checkIn);
+            date2 = new Date(checkOut);
+
+            diffTime = Math.abs(date2 - date1);
+            diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const formatter = new Intl.NumberFormat(`id-ID`, {
+                style: 'currency',
+                currency: 'IDR',
+            })
+            if (date2 > date1){
+                $(".total-cost").html(formatter.format(diffDays * @Model.Cost));
+                $(".total").val(diffDays * @Model.Cost);
+            } else {
+                $(".total-cost").html("-");
+                $(".total").val(null);
+            }
+        }
+
+    </script>
+
+}

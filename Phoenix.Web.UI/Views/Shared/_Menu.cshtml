@@ -1,0 +1,55 @@
+﻿@using System.Security.Claims
+@{
+    var claims = User.Claims;
+    string username = "";
+    foreach(var claim in claims){
+        if (claim.Type == ClaimTypes.NameIdentifier){
+            username = claim.Value;
+        }
+    }
+}
+
+<nav>
+        <div class="company-logo">
+            <img src="~/image/logo.png" />
+            <h1>
+                <span class="bold">PHOENIX</span> Hotel
+            </h1>
+        </div>
+        <a class="menu" asp-controller="Home" asp-action="Index">
+                <i class="fas fa-th"></i>
+                <span>Home</span>
+        </a>
+        @if (User.IsInRole("Administrator"))
+        {
+            <a class="menu" asp-controller="Admin" asp-action="Index">
+                <i class="fas fa-th"></i>
+                <span>Admin</span>
+            </a>
+            <a class="menu" asp-controller="Inventory" asp-action="Index">
+                <i class="fab fa-amazon"></i>
+                <span>Inventory</span>
+            </a>
+            <a class="menu" asp-controller="Room" asp-action="Index">
+                <i class="fab fa-amazon"></i>
+                <span>Rooms</span>
+            </a>
+            <a class="menu" asp-controller="RoomService" asp-action="Index">
+                <i class="fab fa-amazon"></i>
+                <span>Room Service</span>
+            </a>
+            <a class="menu" asp-controller="ReservationLog" asp-action="Index">
+                <i class="fab fa-amazon"></i>
+                <span>Reservation Log</span>
+            </a>
+        } else if (User.IsInRole("Guest")){
+            <a class="menu" asp-controller="Booking" asp-action="Index">
+                <i class="fab fa-amazon"></i>
+                <span>Booking</span>
+            </a>
+            <a class="menu" asp-controller="MyRoom" asp-action="Index" asp-route-username="@username">
+                <i class="fab fa-amazon"></i>
+                <span>My Room</span>
+            </a>
+        }
+</nav>

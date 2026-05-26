@@ -1,0 +1,69 @@
+﻿@using Phoenix.DTO.Room
+@model UpdateRoomDTO
+
+@section pageTitle {
+    <span>Room Form</span>
+}
+
+<form method="post" asp-action="Update" class="upsert-form">
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <label asp-for="RoomNumber"></label>
+                </td>
+                <td>
+                    <span>@Model.RoomNumber</span>
+                    <input type="hidden" asp-for="RoomNumber" />
+                    <span asp-validation-for="RoomNumber"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="Floor"></label>
+                </td>
+                <td>
+                    <input asp-for="Floor" />
+                    <span asp-validation-for="Floor"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="RoomType"></label>
+                </td>
+                <td>
+                    <select asp-for="RoomType" asp-items="@(new SelectList(Model.RoomTypeDropdown, "Value", "DisplayName"))"></select>
+                    <span asp-validation-for="RoomType"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="GuestLimit"></label>
+                </td>
+                <td>
+                    <input asp-for="GuestLimit" />
+                    <span asp-validation-for="GuestLimit"></span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label asp-for="Cost"></label>
+                </td>
+                <td>
+                    <input asp-for="Cost" />
+                    <span asp-validation-for="Cost"></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="textarea-label">
+                    <label asp-for="Description"></label>
+                </td>
+                <td>
+                    <textarea asp-for="Description"></textarea>
+                    <span asp-validation-for="Description"></span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button type="submit" class="blue-button">Save Room</button>
+</form>

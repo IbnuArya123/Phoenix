@@ -1,0 +1,192 @@
+﻿@{
+    ViewData["Title"] = "Reservation Log";
+}
+
+@section pageTitle {
+    <span>Reservation Log</span>
+}
+
+<div class="grid-container">
+    <form class="filter">
+        <input type="text" name="roomNumber" placeholder="Room Number..."/>
+        <button class="blue-button filter-button" type="submit">Search</button>
+    </form>
+
+    <a href="javascript:;" class="blue-button income-button">Total Income</a>
+    <table class="reservation-data">
+        <thead>
+            <th>Code</th>
+            <th>Room Number</th>
+            <th>Username</th>
+            <th>Book Date</th>
+            <th>Check In</th>
+            <th>Check Out</th>
+            <th>Payment Date</th>
+        </thead>
+        <tbody>
+        </tbody>
+        <tfoot>
+            <tr>
+            <td colspan="7">
+                <div class="pagination">
+                <div>
+                    Page <span class="current-page"></span> of <span class="total-page"></span>
+                </div>
+                <div class="page-numbers"></div>
+                </div>
+            </td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+@section indexScript{
+
+    <script>
+        (function(){
+            getReservationLogIndex();
+            createIncomeListener();
+            createSaveListener();
+            closePopupListener();
+            getMonthDropdown();
+            getYearDropdown();
+        }())
+
+        function getReservationLogIndex(roomNumber = "", page = 1){
+            let endpoint = `/ReservationLog/GetReservationLog?roomNumber=${roomNumber}&page={page}`;
+            $.ajax({
+                url: endpoint,
+                success: function(response){
+                    if(!response.isException){
+                        populateTable(response);
+                    }
+                }
+            });
+        }
+
+        function populateTable({data}){
+            let rows = "";
+            for (let tableRow of data.table){
+                let row = 
+                `
+                    <tr>
+                        <td>
+                            <a href="/ReservationLog/Detail?code=${tableRow.code}" class="blue-button detail-button">${tableRow.code}</a>
+                        </td>
+                        <td>${tableRow.roomNumber}</td>
+                        <td>${tableRow.username}</td>
+                        <td>${tableRow.bookDate}</td>
+                        <td>${tableRow.checkIn}</td>
+                        <td>${tableRow.checkOut}</td>
+                        <td>${tableRow.paymentDate}</td>
+                    </tr>;
+                `
+                rows += row;
+            }
+            $(".reservation-data tbody").html(rows);
+            $(".current-page").text(data.currentPage);
+            $(".total-page").text(data.totalPages);
+
+            let pageLinks = "";
+            for(let index = 1; index <= data.totalPage; index++){
+                let pageLink = `<a href="javascript:;" data-page="${index}">${index}</a> `;
+                pageLinks += pageLink;
+            }
+            $(".page-numbers").html(pageLinks);
+            createPageLinkListener();
+        }
+
+        function collectInputForm(){
+            let dto = {
+                month: $(".income-popup .month-dropdown").val(),
+                year: $(".income-popup .year-dropdown").val()
+            }
+            return dto;
+        }
+
+        function getMonthDropdown(){
+            let endpoint = "/ReservationLog/GetMonthDropdown";
+            $.ajax({
+                url: endpoint,
+                method: "GET",
+                success: function(response){
+                    for(let data of response.data){
+                        $(".month-dropdown").append($(`<option>`,{
+                            value: data.value,
+                            text: data.displayName
+                        }));
+                    }
+                }
+            });
+        }
+
+        function getYearDropdown(){
+            let endpoint = "/ReservationLog/GetYearDropdown";
+            $.ajax({
+                url: endpoint,
+                method: "GET",
+                success: function(response){
+                    for(let data of response.data){
+                        $(".year-dropdown").append($(`<option>`,{
+                            value: data.value,
+                            text: data.displayName
+                        }));
+                    }
+                }
+            });
+        }
+
+        // function Listener
+
+        function createPageLinkListener(){
+            $(".page-numbers > a").click(function(event){
+                let pageNumber = $(this).attr("data-page");
+                let room = $("[name=roomNumber]").val();
+                getEmployeeIndex(room, pageNumber);
+            });
+        }
+
+        function createIncomeListener(){
+            $(".income-button").click(function(event){
+                $(".modal-layer").attr("style", "display:flex");
+                $(".income-popup").attr("style", "display:block");
+            });
+
+        }
+
+        function createSaveListener(){
+            $(".income-popup button").click(function(event){
+                $(".income").text("-");
+                let dto = collectInputForm();
+                let endpoint = "/ReservationLog/GetTotalIncome";
+                $.ajax({
+                    url: endpoint,
+                    method: "POST",
+                    data: JSON.stringify(dto),
+                    contentType: "application/json",
+                    success: function(response){
+                        if(!response.isException){
+                            $(".income").text(response.data);
+                        }
+                    }
+                })
+            });
+        }
+
+        function closePopupListener() {
+            $(".fa-window-close").click(function(event){
+                $(".modal-layer").removeAttr("style", "display:flex");
+                $(".income-dialog").removeAttr("style", "display:block");
+                $(".income").text("-");
+            });
+        }
+
+    </script>
+
+}
+
+@section popUpDialog {
+    <div class="modal-layer">
+        <partial name="_IncomeDialog" />
+    </div>
+}
